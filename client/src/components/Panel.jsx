@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { api, ahoraBA, sumarDias, fechaLarga, precio, horaFin, ESTADOS, ORIGENES } from '../lib.js';
+import AsistenteDueno from './AsistenteDueno.jsx';
 
 const HORAS_DEFAULT = Array.from({ length: 8 }, (_, i) => `${16 + i}:00`);
 const DIEZ_MIN = 10 * 60 * 1000;
@@ -252,6 +253,9 @@ export default function Panel({ info, activo }) {
           acento="texto-led-oro"
         />
       </div>
+
+      {/* Funciones con IA: promo para turnos vacíos y análisis del día */}
+      <AsistenteDueno fecha={fecha} />
 
       {/* Grilla canchas x horarios */}
       <section>

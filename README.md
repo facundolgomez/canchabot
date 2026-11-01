@@ -29,6 +29,8 @@ cd client && npm run dev   # frontend en :5173, /api va por proxy a :3000
 | GET    | `/api/reservas`      | Lista de reservas (opcional `?fecha=YYYY-MM-DD`)               |
 | PATCH  | `/api/reservas/:id`  | `{ estado: "pendiente_sena" \| "confirmada" \| "cancelada" }`   |
 | GET    | `/api/complejo`      | Info del complejo, horarios y modo (ia/demo)                   |
+| POST   | `/api/promo`         | `{ fecha }` → promo para llenar turnos libres (titulo, texto, turnos_en_promo, descuento_sugerido, hashtags) |
+| POST   | `/api/analisis`      | `{ fecha }` → resumen, ocupacion_porcentaje, insights, recomendaciones |
 
 ## Deploy (Render, Railway, etc.)
 

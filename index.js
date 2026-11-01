@@ -7,6 +7,7 @@ import { complejo, HORAS } from './data/complejo.js';
 import { listarReservas, cambiarEstado } from './lib/reservas.js';
 import { procesarChat, modoActual } from './lib/asistente.js';
 import { ahoraBA } from './lib/fechas.js';
+import { generarPromo, analizarDia } from './lib/dueno.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -43,6 +44,19 @@ app.patch('/api/reservas/:id', (req, res) => {
   if (!resultado.ok) return res.status(resultado.status).json({ error: resultado.error });
   res.json(resultado.reserva);
 });
+
+// IA para el dueño
+async function responderIA(res, fn) {
+  try {
+    res.json(await fn());
+  } catch (e) {
+    if (!e.publicMessage) console.error('[dueño]', e);
+    res.status(e.status || 500).json({ error: e.publicMessage || 'Error inesperado en el servidor.' });
+  }
+}
+
+app.post('/api/promo', (req, res) => responderIA(res, () => generarPromo(req.body?.fecha)));
+app.post('/api/analisis', (req, res) => responderIA(res, () => analizarDia(req.body?.fecha)));
 
 app.use('/api', (req, res) => {
   res.status(404).json({ error: 'Endpoint no encontrado' });
