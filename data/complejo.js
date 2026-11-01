@@ -59,13 +59,25 @@ export const complejo = {
     estacionamiento: 'Estacionamiento propio y gratuito para 30 autos, con vigilancia. También hay lugar para motos y bicis.',
     pecheras: { precio: 3000, detalle: 'Alquiler de juego de pecheras (2 colores) por $3.000 el turno.' },
     pelota: 'La pelota está incluida en el turno, sin cargo.',
-    buffet: 'Buffet con bebidas frías, sándwiches y parrilla los fines de semana.',
+    cantina: {
+      horario: 'Abierta todos los días de 16 a 24 hs, igual que las canchas.',
+      detalle:
+        'Cantina con bebidas frías (agua, gaseosas, aguas saborizadas, isotónicas y cerveza), sándwiches, empanadas y snacks. Los viernes, sábados y domingos hay parrilla (choripán y hamburguesas).',
+      espacio: 'Tiene mesas bajo techo con vista a las canchas, para el tercer tiempo.',
+      pagos: 'Se paga en efectivo, transferencia o débito.',
+    },
+  },
+  accesibilidad: {
+    rampa: 'Hay rampa de acceso desde la vereda y desde el estacionamiento hasta las canchas, sin escalones.',
+    bano: 'Hay un baño adaptado para personas en silla de ruedas, junto a los vestuarios.',
+    canchas: 'Las tres canchas están a nivel del piso, sin escalones para entrar, y los pasillos entre canchas son anchos.',
+    estacionamiento: 'Hay 2 lugares de estacionamiento reservados para personas con discapacidad, al lado de la entrada.',
   },
   politicas: {
     cancelacion:
-      'Cancelando con más de 24 hs de anticipación se devuelve la seña o se pasa a otra fecha. Con menos de 24 hs la seña no se devuelve.',
+      'Cancelando con más de 24 hs de anticipación se devuelve la seña completa o se pasa a otra fecha. Con menos de 24 hs la seña no se devuelve, pero se puede usar como crédito para otro turno dentro de los 7 días. Para cancelar hay que avisar por WhatsApp.',
     lluvia:
-      'Si llueve y la reserva es en cancha descubierta (Cancha 2 o 3), se reprograma sin cargo o se pasa a la techada si está libre.',
+      'La Cancha 1 es techada y se juega igual. Si llueve y la reserva es en una cancha descubierta (Cancha 2 o 3), se puede pasar a la techada si está libre, o reprogramar sin cargo y la seña queda para la nueva fecha. La decisión de suspender por lluvia la toma el encargado hasta 1 hora antes del turno y se avisa por WhatsApp.',
     tolerancia: 'Hay 10 minutos de tolerancia. El turno termina a la hora pactada.',
   },
 };
