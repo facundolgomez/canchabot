@@ -31,6 +31,10 @@ cd client && npm run dev   # frontend en :5173, /api va por proxy a :3000
 | GET    | `/api/complejo`      | Info del complejo, horarios y modo (ia/demo)                   |
 | POST   | `/api/promo`         | `{ fecha }` → promo para llenar turnos libres (titulo, texto, turnos_en_promo, descuento_sugerido, hashtags) |
 | POST   | `/api/analisis`      | `{ fecha }` → resumen, ocupacion_porcentaje, insights, recomendaciones |
+| GET    | `/api/consultas`     | Preguntas que el asistente derivó al encargado (pendientes primero) |
+| PATCH  | `/api/consultas/:id` | `{ estado: "pendiente" \| "respondida" }`                       |
+
+**Por chat el cliente también puede:** cancelar o cambiar su reserva (se identifica con el teléfono con que reservó; solo puede tocar las suyas). Si pide un horario ocupado, el backend le propone lo más cercano libre.
 
 ## Deploy (Render, Railway, etc.)
 

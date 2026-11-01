@@ -8,6 +8,7 @@ import { listarReservas, cambiarEstado } from './lib/reservas.js';
 import { procesarChat, modoActual } from './lib/asistente.js';
 import { ahoraBA } from './lib/fechas.js';
 import { generarPromo, analizarDia } from './lib/dueno.js';
+import { listarConsultas, marcarConsulta } from './lib/consultas.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -43,6 +44,17 @@ app.patch('/api/reservas/:id', (req, res) => {
   const resultado = cambiarEstado(Number(req.params.id), req.body?.estado);
   if (!resultado.ok) return res.status(resultado.status).json({ error: resultado.error });
   res.json(resultado.reserva);
+});
+
+// Consultas que el asistente derivó al encargado
+app.get('/api/consultas', (req, res) => {
+  res.json(listarConsultas());
+});
+
+app.patch('/api/consultas/:id', (req, res) => {
+  const r = marcarConsulta(Number(req.params.id), req.body?.estado);
+  if (!r.ok) return res.status(r.status).json({ error: r.error });
+  res.json(r.consulta);
 });
 
 // IA para el dueño

@@ -13,16 +13,18 @@ const EJEMPLOS = [
   'Somos 10, ¿tenés algo el jueves después de las 20?',
   '¿Cuánto sale la techada?',
   'Somos 14, ¿qué hay para mañana a la noche?',
-  '¿Hay vestuarios y estacionamiento?',
+  '¿Tenés la cancha 1 mañana a las 20?',
+  '¿Es accesible para silla de ruedas?',
+  'Quiero cancelar mi reserva',
+  'Necesito cambiar mi reserva',
   '¿Cómo es lo de la seña?',
-  '¿Tenés algo hoy?',
 ];
 
 // Color del fondo del chat, para los "troqueles" del comprobante
 const FONDO_CHAT = '#060b14';
 
-// Texto que se manda cuando el cliente toca una tarjeta
-const textoEleccion = (op) => `Quiero reservar la ${op.canchaNombre} (${op.tipo}) el ${op.dia} a las ${op.hora}`;
+// Texto que se manda cuando el cliente toca una tarjeta (neutro: sirve para reservar o para cambiar)
+const textoEleccion = (op) => `Elijo la ${op.canchaNombre} (${op.tipo}) el ${op.dia} a las ${op.hora}`;
 
 // Lo que ve la IA de cada mensaje: el texto + un resumen de tarjetas/comprobantes mostrados
 function paraHistorial(m) {
@@ -34,6 +36,14 @@ function paraHistorial(m) {
     const r = m.reserva;
     content += `\n[Reserva registrada ${r.codigo}: ${r.canchaNombre} ${r.fecha} ${r.hora} a nombre de ${r.nombre}]`;
   }
+  if (m.gestion) {
+    const r = m.gestion.reserva;
+    content +=
+      m.gestion.tipo === 'cancelar'
+        ? `\n[Reserva cancelada ${r.codigo}]`
+        : `\n[Reserva modificada ${r.codigo}: ahora ${r.canchaNombre} ${r.fecha} ${r.hora}]`;
+  }
+  if (m.consulta) content += `\n[Consulta derivada al encargado: ${m.consulta.pregunta}]`;
   return { role: m.role, content };
 }
 
@@ -69,8 +79,63 @@ function TarjetaTurno({ op, onElegir, deshabilitada, indice }) {
   );
 }
 
-function Comprobante({ reserva, sena }) {
+const jugadoresDe = (r) => r.jugadores || (String(r.tipo).includes('7') ? 14 : 10);
+const porJugador = (r) => Math.ceil(r.precio / jugadoresDe(r) / 10) * 10;
+
+function textoParaGrupo(r, complejo) {
+  return [
+    '⚽ ¡Tenemos cancha!',
+    `📅 ${r.dia.charAt(0).toUpperCase() + r.dia.slice(1)} · ${r.hora} a ${horaFin(r.hora)}`,
+    `🏟️ ${r.canchaNombre} (${r.tipo}) — ${complejo?.nombre ?? 'Complejo La Redonda'}`,
+    complejo?.direccion ? `📍 ${complejo.direccion}` : null,
+    `💰 ${precio(r.precio)} en total → ${precio(porJugador(r))} por jugador (somos ${jugadoresDe(r)})`,
+    `🔖 Reserva ${r.codigo}`,
+  ]
+    .filter(Boolean)
+    .join('\n');
+}
+
+function TarjetaCancelada({ gestion }) {
+  const r = gestion.reserva;
+  const sena =
+    r.estadoPrevio === 'pendiente_sena'
+      ? 'La seña no estaba pagada: no hay nada que devolver.'
+      : r.senaComoCredito
+        ? `La seña de ${precio(r.sena)} queda como crédito por 7 días.`
+        : `Se devuelve la seña de ${precio(r.sena)}.`;
+  return (
+    <div className="animate-aparecer w-full max-w-sm overflow-hidden rounded-2xl border border-red-400/30 bg-gradient-to-b from-noche-800 to-noche-950">
+      <div className="flex items-center justify-between bg-red-500/15 px-4 py-2">
+        <p className="font-display text-2xl tracking-wide text-red-200">Reserva cancelada</p>
+        <span className="font-score text-sm font-semibold tracking-widest text-red-300">{r.codigo}</span>
+      </div>
+      <div className="space-y-1 px-4 py-3 text-sm">
+        <p className="capitalize text-zinc-300 line-through decoration-red-400/60">
+          {r.canchaNombre} · {r.dia} · {r.hora} a {horaFin(r.hora)}
+        </p>
+        <p className="text-xs text-zinc-400">{sena}</p>
+      </div>
+    </div>
+  );
+}
+
+function Comprobante({ reserva, complejo, anterior = null }) {
+  const sena = complejo?.sena;
+  const alias = sena?.alias ?? 'LAREDONDA.FUTBOL';
   const estado = ESTADOS[reserva.estado] ?? ESTADOS.pendiente_sena;
+  const senaPagada = reserva.estado === 'confirmada';
+  const [aliasCopiado, setAliasCopiado] = useState(false);
+
+  async function copiarAlias() {
+    try {
+      await navigator.clipboard.writeText(alias);
+      setAliasCopiado(true);
+      setTimeout(() => setAliasCopiado(false), 1800);
+    } catch {
+      /* sin portapapeles: el alias queda visible igual */
+    }
+  }
+
   const filas = [
     ['Cancha', `${reserva.canchaNombre} · ${reserva.tipo}`],
     ['Fecha', reserva.dia],
@@ -84,9 +149,9 @@ function Comprobante({ reserva, sena }) {
       <div className="flex items-center justify-between bg-gradient-to-r from-oro-300 via-oro-400 to-oro-500 px-4 py-2 text-noche-950">
         <div className="leading-none">
           <p className="text-[9px] font-bold uppercase tracking-[0.3em] opacity-70">Entrada · La Redonda</p>
-          <p className="font-display text-2xl tracking-wide">Reserva registrada</p>
+          <p className="font-display text-2xl tracking-wide">{anterior ? 'Reserva modificada' : 'Reserva registrada'}</p>
         </div>
-        <span className="grid size-8 place-items-center rounded-full bg-noche-950 text-sm text-oro-300">✓</span>
+        <span className="grid size-8 place-items-center rounded-full bg-noche-950 text-sm text-oro-300">{anterior ? '↻' : '✓'}</span>
       </div>
 
       <div className="px-4 py-3">
@@ -94,6 +159,14 @@ function Comprobante({ reserva, sena }) {
           <p className="text-[10px] uppercase tracking-[0.2em] text-zinc-500">Código</p>
           <p className="font-score text-xl font-semibold tracking-widest texto-led-oro">{reserva.codigo}</p>
         </div>
+        {anterior && (
+          <p className="mt-2 rounded-lg bg-white/5 px-2.5 py-1.5 text-xs text-zinc-400">
+            Antes:{' '}
+            <span className="line-through">
+              {anterior.canchaNombre} · {anterior.dia} · {anterior.hora}
+            </span>
+          </p>
+        )}
         <dl className="mt-2 space-y-1.5 text-sm">
           {filas.map(([k, v]) => (
             <div key={k} className="flex justify-between gap-3">
@@ -112,24 +185,58 @@ function Comprobante({ reserva, sena }) {
 
       <div className="space-y-1 px-4 py-3 text-sm">
         <div className="flex justify-between">
-          <span className="text-zinc-500">Total</span>
+          <span className="text-zinc-500">Total del turno</span>
           <span className="font-score font-semibold text-white">{precio(reserva.precio)}</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-zinc-500">Por jugador ({jugadoresDe(reserva)})</span>
+          <span className="font-score font-semibold text-cesped-300">{precio(porJugador(reserva))}</span>
         </div>
         <div className="flex justify-between">
           <span className="text-zinc-500">Seña ({sena?.porcentaje ?? 30}%)</span>
           <span className="font-score text-lg font-semibold text-oro-300">{precio(reserva.sena)}</span>
         </div>
-        <p className="mt-2 rounded-xl border border-white/5 bg-black/30 px-3 py-2 text-xs text-zinc-400">
-          Transferí la seña al alias <b className="font-mono text-oro-200">{sena?.alias ?? 'LAREDONDA.FUTBOL'}</b> dentro de las{' '}
-          {sena?.plazoHoras ?? 2} hs para confirmar el turno.
-        </p>
-        <span className={`mt-2 inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 ${estado.badge}`}>{estado.label}</span>
+
+        {senaPagada ? (
+          <p className="mt-2 rounded-xl border border-cesped-400/20 bg-cesped-400/10 px-3 py-2 text-xs text-cesped-200">
+            ✓ Seña pagada. ¡Nos vemos en la cancha!
+          </p>
+        ) : (
+          <div className="mt-2 rounded-xl border border-white/5 bg-black/30 px-3 py-2 text-xs text-zinc-400">
+            Transferí la seña dentro de las {sena?.plazoHoras ?? 2} hs al alias:
+            <button
+              type="button"
+              onClick={copiarAlias}
+              className="mt-1.5 flex w-full items-center justify-between rounded-lg border border-oro-400/30 bg-oro-400/10 px-2.5 py-1.5 font-mono text-sm font-bold text-oro-200 transition hover:bg-oro-400/20"
+            >
+              {alias}
+              <span className="font-sans text-[10px] font-semibold uppercase tracking-wider text-oro-300">
+                {aliasCopiado ? '✓ Copiado' : 'Copiar'}
+              </span>
+            </button>
+          </div>
+        )}
+
+        <div className="flex flex-wrap items-center justify-between gap-2 pt-2">
+          <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 ${estado.badge}`}>{estado.label}</span>
+          <a
+            href={`https://wa.me/?text=${encodeURIComponent(textoParaGrupo(reserva, complejo))}`}
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center gap-1.5 rounded-full bg-gradient-to-b from-cesped-400 to-cesped-600 px-3 py-1.5 text-xs font-semibold text-noche-950 shadow-[0_0_16px_-4px_rgb(34_227_107/0.8)] transition hover:brightness-110"
+          >
+            <svg viewBox="0 0 24 24" className="size-3.5" fill="currentColor" aria-hidden>
+              <path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.3-.5.1-1 .1-1.7-.1-.4-.1-.9-.3-1.5-.6-2.6-1.1-4.3-3.8-4.5-4-.1-.2-1.1-1.4-1.1-2.7s.7-1.9.9-2.2c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.3 0 .5l-.3.5-.4.4c-.1.1-.3.3-.1.6.2.3.7 1.2 1.6 1.9 1.1 1 2 1.3 2.3 1.4.3.1.5.1.6-.1l.9-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.3Z" />
+            </svg>
+            Compartir con el grupo
+          </a>
+        </div>
       </div>
     </div>
   );
 }
 
-function Burbuja({ m, activa, cargando, onElegir, sena }) {
+function Burbuja({ m, activa, cargando, onElegir, complejo }) {
   const esUsuario = m.role === 'user';
   return (
     <div className={`animate-aparecer flex ${esUsuario ? 'justify-end' : 'justify-start'}`}>
@@ -160,7 +267,16 @@ function Burbuja({ m, activa, cargando, onElegir, sena }) {
           </div>
         )}
 
-        {m.reserva && <Comprobante reserva={m.reserva} sena={sena} />}
+        {m.reserva && <Comprobante reserva={m.reserva} complejo={complejo} />}
+        {m.gestion?.tipo === 'cambiar' && (
+          <Comprobante reserva={m.gestion.reserva} complejo={complejo} anterior={m.gestion.anterior || m.gestion.reserva.anterior} />
+        )}
+        {m.gestion?.tipo === 'cancelar' && <TarjetaCancelada gestion={m.gestion} />}
+        {m.consulta && (
+          <p className="animate-aparecer flex items-center gap-1.5 rounded-full border border-oro-400/25 bg-oro-400/10 px-3 py-1 text-[11px] font-medium text-oro-200">
+            📨 Le pasé tu consulta al encargado
+          </p>
+        )}
       </div>
     </div>
   );
@@ -205,6 +321,8 @@ export default function Chat({ info }) {
           intencion: r.intencion,
           opciones: r.opciones || [],
           reserva: r.reserva || null,
+          gestion: r.gestion || null,
+          consulta: r.consulta || null,
           hora: horaActualTexto(),
         },
       ]);
@@ -272,7 +390,7 @@ export default function Chat({ info }) {
             activa={i === ultimoAsistente}
             cargando={cargando}
             onElegir={(op) => enviar(textoEleccion(op))}
-            sena={info?.complejo?.sena}
+            complejo={info?.complejo}
           />
         ))}
         {cargando && <Escribiendo />}

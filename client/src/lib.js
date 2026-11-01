@@ -20,6 +20,8 @@ export const api = {
   chat: (historial) => pedir('/api/chat', { method: 'POST', body: JSON.stringify({ historial }) }),
   reservas: () => pedir('/api/reservas'),
   cambiarEstado: (id, estado) => pedir(`/api/reservas/${id}`, { method: 'PATCH', body: JSON.stringify({ estado }) }),
+  consultas: () => pedir('/api/consultas'),
+  marcarConsulta: (id, estado) => pedir(`/api/consultas/${id}`, { method: 'PATCH', body: JSON.stringify({ estado }) }),
   promo: (fecha) => pedir('/api/promo', { method: 'POST', body: JSON.stringify({ fecha }) }),
   analisis: (fecha) => pedir('/api/analisis', { method: 'POST', body: JSON.stringify({ fecha }) }),
 };
