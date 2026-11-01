@@ -2,13 +2,32 @@
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Barlow Condensed", "Inter", ui-sans-serif, sans-serif;
+  --font-display: "Bebas Neue", "Oswald", Impact, ui-sans-serif, sans-serif;
+  --font-score: "Oswald", "Bebas Neue", ui-sans-serif, sans-serif;
 
-  --color-cancha-950: #06120c;
-  --color-cancha-900: #0a1d13;
-  --color-cancha-800: #0f2a1b;
-  --color-cancha-700: #164027;
-  --color-cancha-600: #1f5a36;
+  /* Noche */
+  --color-noche-950: #04070d;
+  --color-noche-900: #070d18;
+  --color-noche-800: #0c1526;
+  --color-noche-700: #132037;
+
+  /* Césped intenso */
+  --color-cesped-300: #6cf5a0;
+  --color-cesped-400: #22e36b;
+  --color-cesped-500: #12c45a;
+  --color-cesped-600: #0b9a45;
+  --color-cesped-700: #0a6b33;
+  --color-cesped-900: #05341a;
+
+  /* Dorado */
+  --color-oro-200: #fff1c2;
+  --color-oro-300: #ffe08a;
+  --color-oro-400: #f5c542;
+  --color-oro-500: #e0a92a;
+
+  --animate-aparecer: aparecer 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-haz: haz 7s ease-in-out infinite;
+  --animate-latido: latido 2s ease-in-out infinite;
 }
 
 html {
@@ -17,23 +36,116 @@ html {
 
 body {
   margin: 0;
-  background-color: var(--color-cancha-950);
+  background-color: var(--color-noche-950);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
 }
 
-/* Franjas de césped */
-.cesped {
+/* ---------- Glass ---------- */
+
+@layer components {
+.glass {
+  background: rgb(9 16 30 / 0.55);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  backdrop-filter: blur(14px) saturate(140%);
+  border: 1px solid rgb(255 255 255 / 0.08);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.06),
+    0 18px 40px -18px rgb(0 0 0 / 0.75);
+}
+
+.glass-fuerte {
+  background: rgb(6 11 22 / 0.78);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  backdrop-filter: blur(18px) saturate(150%);
+  border: 1px solid rgb(255 255 255 / 0.08);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.05),
+    0 30px 60px -20px rgb(0 0 0 / 0.85);
+}
+
+}
+
+.glow-hover {
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.25s ease,
+    background-color 0.2s ease;
+}
+.glow-hover:not(:disabled):hover {
+  border-color: rgb(34 227 107 / 0.55);
+  box-shadow:
+    0 0 0 1px rgb(34 227 107 / 0.25),
+    0 0 28px -6px rgb(34 227 107 / 0.55),
+    inset 0 1px 0 rgb(255 255 255 / 0.08);
+}
+
+/* ---------- Marcador (dot-matrix LED) ---------- */
+
+@layer components {
+.marcador {
+  background-color: #020409;
   background-image:
-    repeating-linear-gradient(90deg, rgb(255 255 255 / 0.035) 0 56px, transparent 56px 112px),
-    radial-gradient(ellipse at top right, rgb(163 230 53 / 0.18), transparent 60%);
+    radial-gradient(rgb(255 255 255 / 0.05) 0.8px, transparent 1px),
+    linear-gradient(180deg, rgb(255 255 255 / 0.04), transparent 40%);
+  background-size: 4px 4px, 100% 100%;
+  border: 1px solid rgb(255 255 255 / 0.1);
+  box-shadow:
+    inset 0 0 0 4px #0a0f1a,
+    inset 0 0 0 5px rgb(255 255 255 / 0.06),
+    0 0 50px -10px rgb(34 227 107 / 0.25),
+    0 25px 60px -20px rgb(0 0 0 / 0.9);
 }
 
-/* Fondo del chat estilo WhatsApp */
+.texto-led-oro {
+  color: var(--color-oro-300);
+  text-shadow:
+    0 0 6px rgb(245 197 66 / 0.6),
+    0 0 22px rgb(245 197 66 / 0.35);
+}
+
+.texto-led-verde {
+  color: var(--color-cesped-300);
+  text-shadow:
+    0 0 6px rgb(34 227 107 / 0.6),
+    0 0 20px rgb(34 227 107 / 0.3);
+}
+
+.texto-brillo {
+  color: #fff;
+  text-shadow:
+    0 0 18px rgb(255 255 255 / 0.35),
+    0 2px 0 rgb(0 0 0 / 0.4);
+}
+
+}
+
+/* ---------- Chat ---------- */
+
 .chat-fondo {
-  background-color: #0b141a;
-  background-image: radial-gradient(rgb(255 255 255 / 0.045) 1px, transparent 1px);
-  background-size: 18px 18px;
+  background-color: rgb(4 8 16 / 0.72);
+  background-image:
+    radial-gradient(rgb(255 255 255 / 0.035) 1px, transparent 1px),
+    radial-gradient(ellipse at 50% 0%, rgb(34 227 107 / 0.07), transparent 60%);
+  background-size: 20px 20px, 100% 100%;
+}
+
+@layer components {
+.burbuja-usuario {
+  background: linear-gradient(135deg, #14a656 0%, #0b7a3d 100%);
+  box-shadow:
+    0 6px 18px -8px rgb(34 227 107 / 0.55),
+    inset 0 1px 0 rgb(255 255 255 / 0.15);
+}
+
+.burbuja-bot {
+  background: rgb(19 28 44 / 0.9);
+  border: 1px solid rgb(255 255 255 / 0.06);
+  box-shadow: 0 6px 18px -10px rgb(0 0 0 / 0.8);
+}
+
 }
 
 .scroll-fino {
@@ -48,10 +160,60 @@ body {
   display: none;
 }
 
+/* ---------- Animaciones ---------- */
+
 @keyframes aparecer {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
-.aparecer {
-  animation: aparecer 0.25s ease-out both;
+
+@keyframes haz {
+  0%,
+  100% {
+    opacity: 0.75;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes latido {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@keyframes flash {
+  0%,
+  92%,
+  100% {
+    opacity: 0;
+  }
+  94% {
+    opacity: 1;
+  }
+}
+
+.flash {
+  animation: flash 9s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

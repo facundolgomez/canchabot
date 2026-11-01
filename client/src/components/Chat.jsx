@@ -18,6 +18,9 @@ const EJEMPLOS = [
   '¿Tenés algo hoy?',
 ];
 
+// Color del fondo del chat, para los "troqueles" del comprobante
+const FONDO_CHAT = '#060b14';
+
 // Texto que se manda cuando el cliente toca una tarjeta
 const textoEleccion = (op) => `Quiero reservar la ${op.canchaNombre} (${op.tipo}) el ${op.dia} a las ${op.hora}`;
 
@@ -34,28 +37,33 @@ function paraHistorial(m) {
   return { role: m.role, content };
 }
 
-function TarjetaTurno({ op, onElegir, deshabilitada }) {
+function TarjetaTurno({ op, onElegir, deshabilitada, indice }) {
   return (
     <button
       type="button"
       onClick={() => onElegir(op)}
       disabled={deshabilitada}
-      className="group flex flex-col rounded-2xl border border-lime-400/30 bg-cancha-800 p-3 text-left transition enabled:hover:-translate-y-0.5 enabled:hover:border-lime-400 enabled:hover:bg-cancha-700 enabled:active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+      style={{ animationDelay: `${indice * 70}ms` }}
+      className="glass glow-hover animate-aparecer group relative flex flex-col overflow-hidden rounded-2xl p-3 text-left enabled:hover:-translate-y-0.5 enabled:active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-45"
     >
+      {/* Línea de luz superior */}
+      <span className="pointer-events-none absolute inset-x-3 top-0 h-px bg-gradient-to-r from-transparent via-cesped-400/60 to-transparent opacity-0 transition-opacity group-enabled:group-hover:opacity-100" />
       <div className="flex items-center justify-between gap-2">
-        <span className="text-xs font-semibold text-zinc-300">
+        <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
           {op.canchaNombre} · {op.tipo}
         </span>
-        {op.techada && <span className="rounded-full bg-sky-400/15 px-1.5 py-0.5 text-[10px] font-semibold text-sky-300">Techada</span>}
+        {op.techada && (
+          <span className="rounded-full bg-sky-400/15 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-sky-300">Techada</span>
+        )}
       </div>
-      <p className="mt-1 font-display text-3xl font-bold leading-none text-white">
+      <p className="mt-1 font-display text-4xl leading-none tracking-wide text-white">
         {op.hora}
-        <span className="ml-1 text-base font-semibold text-zinc-400">a {horaFin(op.hora)}</span>
+        <span className="ml-1.5 font-score text-sm font-medium text-zinc-500">a {horaFin(op.hora)}</span>
       </p>
       <p className="mt-0.5 text-sm capitalize text-zinc-300">{op.dia}</p>
-      <div className="mt-2 flex items-center justify-between">
-        <span className="font-semibold text-lime-300">{precio(op.precio)}</span>
-        <span className="text-xs font-semibold text-lime-400 group-enabled:group-hover:translate-x-0.5">Elegir →</span>
+      <div className="mt-2.5 flex items-center justify-between border-t border-white/5 pt-2">
+        <span className="font-score text-base font-semibold text-oro-300">{precio(op.precio)}</span>
+        <span className="text-xs font-semibold text-cesped-400 transition-transform group-enabled:group-hover:translate-x-0.5">Elegir →</span>
       </div>
     </button>
   );
@@ -71,42 +79,51 @@ function Comprobante({ reserva, sena }) {
     ['Teléfono', reserva.telefono],
   ];
   return (
-    <div className="aparecer w-full max-w-sm overflow-hidden rounded-2xl bg-white text-zinc-900 shadow-xl">
-      <div className="flex items-center justify-between bg-lime-400 px-4 py-2.5">
-        <span className="font-display text-xl font-extrabold uppercase tracking-wide">Reserva registrada</span>
-        <span className="text-lg">✅</span>
+    <div className="animate-aparecer relative w-full max-w-sm overflow-hidden rounded-2xl border border-oro-400/35 bg-gradient-to-b from-noche-800 to-noche-950 shadow-[0_0_40px_-12px_rgb(245_197_66/0.45)]">
+      {/* Cabecera tipo entrada */}
+      <div className="flex items-center justify-between bg-gradient-to-r from-oro-300 via-oro-400 to-oro-500 px-4 py-2 text-noche-950">
+        <div className="leading-none">
+          <p className="text-[9px] font-bold uppercase tracking-[0.3em] opacity-70">Entrada · La Redonda</p>
+          <p className="font-display text-2xl tracking-wide">Reserva registrada</p>
+        </div>
+        <span className="grid size-8 place-items-center rounded-full bg-noche-950 text-sm text-oro-300">✓</span>
       </div>
+
       <div className="px-4 py-3">
-        <p className="text-xs text-zinc-500">
-          Código <span className="font-mono font-bold text-zinc-900">{reserva.codigo}</span>
-        </p>
-        <dl className="mt-2 space-y-1 text-sm">
+        <div className="flex items-end justify-between">
+          <p className="text-[10px] uppercase tracking-[0.2em] text-zinc-500">Código</p>
+          <p className="font-score text-xl font-semibold tracking-widest texto-led-oro">{reserva.codigo}</p>
+        </div>
+        <dl className="mt-2 space-y-1.5 text-sm">
           {filas.map(([k, v]) => (
             <div key={k} className="flex justify-between gap-3">
               <dt className="text-zinc-500">{k}</dt>
-              <dd className="text-right font-semibold">{v}</dd>
+              <dd className="text-right font-semibold capitalize text-white">{v}</dd>
             </div>
           ))}
         </dl>
       </div>
-      <div className="relative border-t-2 border-dashed border-zinc-300 px-4 py-3 text-sm">
-        <span className="absolute -left-2.5 -top-2.5 size-5 rounded-full bg-[#0b141a]" />
-        <span className="absolute -right-2.5 -top-2.5 size-5 rounded-full bg-[#0b141a]" />
+
+      {/* Troquel */}
+      <div className="relative border-t border-dashed border-white/20">
+        <span className="absolute -left-3 -top-3 size-6 rounded-full" style={{ background: FONDO_CHAT }} />
+        <span className="absolute -right-3 -top-3 size-6 rounded-full" style={{ background: FONDO_CHAT }} />
+      </div>
+
+      <div className="space-y-1 px-4 py-3 text-sm">
         <div className="flex justify-between">
           <span className="text-zinc-500">Total</span>
-          <span className="font-semibold">{precio(reserva.precio)}</span>
+          <span className="font-score font-semibold text-white">{precio(reserva.precio)}</span>
         </div>
         <div className="flex justify-between">
           <span className="text-zinc-500">Seña ({sena?.porcentaje ?? 30}%)</span>
-          <span className="font-bold text-cancha-700">{precio(reserva.sena)}</span>
+          <span className="font-score text-lg font-semibold text-oro-300">{precio(reserva.sena)}</span>
         </div>
-        <p className="mt-2 rounded-lg bg-zinc-100 px-3 py-2 text-xs text-zinc-600">
-          Transferí la seña al alias <b className="font-mono text-zinc-900">{sena?.alias ?? 'LAREDONDA.FUTBOL'}</b> dentro de las{' '}
+        <p className="mt-2 rounded-xl border border-white/5 bg-black/30 px-3 py-2 text-xs text-zinc-400">
+          Transferí la seña al alias <b className="font-mono text-oro-200">{sena?.alias ?? 'LAREDONDA.FUTBOL'}</b> dentro de las{' '}
           {sena?.plazoHoras ?? 2} hs para confirmar el turno.
         </p>
-        <span className="mt-2 inline-block rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-800">
-          {estado.label}
-        </span>
+        <span className={`mt-2 inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 ${estado.badge}`}>{estado.label}</span>
       </div>
     </div>
   );
@@ -115,23 +132,27 @@ function Comprobante({ reserva, sena }) {
 function Burbuja({ m, activa, cargando, onElegir, sena }) {
   const esUsuario = m.role === 'user';
   return (
-    <div className={`aparecer flex ${esUsuario ? 'justify-end' : 'justify-start'}`}>
-      <div className={`flex max-w-[88%] flex-col gap-2 sm:max-w-[80%] ${esUsuario ? 'items-end' : 'items-start'}`}>
+    <div className={`animate-aparecer flex ${esUsuario ? 'justify-end' : 'justify-start'}`}>
+      <div className={`flex max-w-[90%] flex-col gap-2 sm:max-w-[82%] ${esUsuario ? 'items-end' : 'items-start'}`}>
         <div
-          className={`whitespace-pre-wrap rounded-2xl px-3.5 py-2 text-[15px] leading-snug shadow ${
-            esUsuario ? 'rounded-tr-sm bg-[#005c4b] text-white' : 'rounded-tl-sm bg-[#202c33] text-zinc-100'
+          className={`whitespace-pre-wrap rounded-2xl px-3.5 py-2 text-[15px] leading-snug ${
+            esUsuario ? 'burbuja-usuario rounded-tr-md text-white' : 'burbuja-bot rounded-tl-md text-zinc-100'
           }`}
         >
           {m.content}
-          <span className="float-right ml-3 mt-1.5 text-[10px] leading-none text-white/45">{m.hora}</span>
+          <span className={`float-right ml-3 mt-1.5 text-[10px] leading-none ${esUsuario ? 'text-white/60' : 'text-zinc-500'}`}>
+            {m.hora}
+            {esUsuario && <span className="ml-1 text-cesped-300">✓✓</span>}
+          </span>
         </div>
 
         {m.opciones?.length > 0 && (
           <div className="grid w-full grid-cols-2 gap-2">
-            {m.opciones.map((op) => (
+            {m.opciones.map((op, i) => (
               <TarjetaTurno
                 key={`${op.cancha}-${op.fecha}-${op.hora}`}
                 op={op}
+                indice={i}
                 onElegir={onElegir}
                 deshabilitada={!activa || cargando}
               />
@@ -147,10 +168,10 @@ function Burbuja({ m, activa, cargando, onElegir, sena }) {
 
 function Escribiendo() {
   return (
-    <div className="flex justify-start">
-      <div className="flex items-center gap-1 rounded-2xl rounded-tl-sm bg-[#202c33] px-4 py-3 shadow">
+    <div className="animate-aparecer flex justify-start">
+      <div className="burbuja-bot flex items-center gap-1 rounded-2xl rounded-tl-md px-4 py-3">
         {[0, 150, 300].map((d) => (
-          <span key={d} className="size-2 animate-bounce rounded-full bg-zinc-400" style={{ animationDelay: `${d}ms` }} />
+          <span key={d} className="size-2 animate-bounce rounded-full bg-cesped-400/80" style={{ animationDelay: `${d}ms` }} />
         ))}
       </div>
     </div>
@@ -213,31 +234,37 @@ export default function Chat({ info }) {
   const ultimoEsUsuario = mensajes.at(-1)?.role === 'user';
 
   return (
-    <section className="flex h-[calc(100dvh-5.5rem)] min-h-[520px] flex-col overflow-hidden rounded-3xl border border-white/10 bg-[#0b141a] shadow-2xl shadow-black/40 lg:h-[calc(100dvh-6.5rem)]">
-      {/* Cabecera estilo WhatsApp */}
-      <div className="flex items-center gap-3 bg-[#202c33] px-4 py-3">
-        <div className="relative grid size-10 shrink-0 place-items-center rounded-full bg-lime-400 font-display text-lg font-extrabold text-cancha-950">
+    <section className="glass-fuerte flex h-[calc(100dvh-5.5rem)] min-h-[520px] flex-col overflow-hidden rounded-3xl lg:h-[calc(100dvh-7.5rem)]">
+      {/* Cabecera */}
+      <div className="relative flex items-center gap-3 border-b border-white/5 bg-gradient-to-r from-noche-800/95 via-noche-900/95 to-noche-800/95 px-4 py-3">
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-cesped-400/40 to-transparent" />
+        <div className="relative grid size-11 shrink-0 place-items-center rounded-full bg-gradient-to-br from-cesped-400 to-cesped-700 font-display text-xl tracking-wide text-noche-950 ring-2 ring-oro-400/60 shadow-[0_0_20px_-4px_rgb(34_227_107/0.7)]">
           LR
-          <span className="absolute bottom-0 right-0 size-3 rounded-full border-2 border-[#202c33] bg-lime-400" />
+          <span className="absolute bottom-0 right-0 size-3 rounded-full border-2 border-noche-900 bg-cesped-400" />
         </div>
         <div className="min-w-0 flex-1 leading-tight">
-          <p className="truncate font-semibold">Asistente La Redonda</p>
-          <p className={`text-xs ${cargando ? 'text-lime-400' : 'text-zinc-400'}`}>
+          <p className="truncate font-semibold text-white">Asistente La Redonda</p>
+          <p className={`text-xs transition-colors ${cargando ? 'text-cesped-400' : 'text-zinc-400'}`}>
             {cargando ? 'escribiendo...' : 'en línea · turnos en tiempo real'}
           </p>
         </div>
         <button
           onClick={reiniciar}
           disabled={cargando}
-          className="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-zinc-300 hover:bg-white/10 disabled:opacity-40"
+          className="rounded-full border border-white/10 px-3 py-1.5 text-xs font-semibold text-zinc-300 transition hover:border-white/20 hover:bg-white/5 disabled:opacity-40"
           title="Empezar una conversación nueva"
         >
-          ↺ Nuevo chat
+          ↺ <span className="hidden sm:inline">Nuevo chat</span>
         </button>
       </div>
 
       {/* Mensajes */}
-      <div ref={scrollRef} className="chat-fondo scroll-fino flex-1 space-y-3 overflow-y-auto px-3 py-4 sm:px-5" aria-live="polite">
+      <div
+        ref={scrollRef}
+        className="chat-fondo scroll-fino flex-1 space-y-3 overflow-y-auto px-3 py-4 sm:px-5"
+        style={{ backgroundColor: FONDO_CHAT }}
+        aria-live="polite"
+      >
         {mensajes.map((m, i) => (
           <Burbuja
             key={m.id}
@@ -250,12 +277,12 @@ export default function Chat({ info }) {
         ))}
         {cargando && <Escribiendo />}
         {error && (
-          <div className="aparecer mx-auto flex max-w-md flex-wrap items-center justify-center gap-2 rounded-2xl border border-red-500/30 bg-red-500/15 px-4 py-2.5 text-center text-sm text-red-200">
+          <div className="animate-aparecer mx-auto flex max-w-md flex-wrap items-center justify-center gap-2 rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-center text-sm text-red-200 backdrop-blur">
             <span>⚠️ {error}</span>
             {ultimoEsUsuario && (
               <button
                 onClick={() => pedirRespuesta(mensajes)}
-                className="rounded-lg bg-red-500/25 px-2.5 py-1 text-xs font-semibold hover:bg-red-500/40"
+                className="rounded-full bg-red-500/25 px-3 py-1 text-xs font-semibold hover:bg-red-500/40"
               >
                 Reintentar
               </button>
@@ -265,13 +292,13 @@ export default function Chat({ info }) {
       </div>
 
       {/* Ejemplos para la demo */}
-      <div className="sin-scroll flex gap-2 overflow-x-auto border-t border-white/5 bg-[#111b21] px-3 py-2">
+      <div className="sin-scroll flex gap-2 overflow-x-auto border-t border-white/5 bg-noche-950/80 px-3 py-2">
         {EJEMPLOS.map((e) => (
           <button
             key={e}
             onClick={() => enviar(e)}
             disabled={cargando}
-            className="shrink-0 rounded-full border border-lime-400/30 bg-lime-400/10 px-3 py-1.5 text-xs font-medium text-lime-200 transition hover:bg-lime-400/20 disabled:opacity-40"
+            className="glow-hover shrink-0 rounded-full border border-cesped-400/25 bg-cesped-400/[0.07] px-3 py-1.5 text-xs font-medium text-cesped-300 hover:bg-cesped-400/15 disabled:opacity-40"
           >
             {e}
           </button>
@@ -284,7 +311,7 @@ export default function Chat({ info }) {
           e.preventDefault();
           enviar(texto);
         }}
-        className="flex items-center gap-2 bg-[#202c33] px-3 py-2.5"
+        className="flex items-center gap-2 border-t border-white/5 bg-noche-900/95 px-3 py-2.5"
       >
         <input
           ref={inputRef}
@@ -292,13 +319,13 @@ export default function Chat({ info }) {
           onChange={(e) => setTexto(e.target.value)}
           placeholder="Escribí tu mensaje…"
           maxLength={500}
-          className="min-w-0 flex-1 rounded-full bg-[#2a3942] px-4 py-2.5 text-[15px] text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-lime-400/60"
+          className="min-w-0 flex-1 rounded-full border border-white/10 bg-black/40 px-4 py-2.5 text-base text-zinc-100 transition placeholder:text-zinc-500 focus:border-cesped-400/50 focus:outline-none focus:ring-2 focus:ring-cesped-400/30 sm:text-[15px]"
           aria-label="Mensaje"
         />
         <button
           type="submit"
           disabled={cargando || !texto.trim()}
-          className="grid size-11 shrink-0 place-items-center rounded-full bg-lime-400 text-cancha-950 transition hover:bg-lime-300 disabled:opacity-40"
+          className="grid size-11 shrink-0 place-items-center rounded-full bg-gradient-to-b from-cesped-400 to-cesped-600 text-noche-950 shadow-[0_0_18px_-4px_rgb(34_227_107/0.8)] transition enabled:hover:scale-105 enabled:active:scale-95 disabled:opacity-35 disabled:shadow-none"
           aria-label="Enviar"
         >
           <svg viewBox="0 0 24 24" className="size-5" fill="currentColor" aria-hidden>

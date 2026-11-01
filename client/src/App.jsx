@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import Estadio from './components/Estadio.jsx';
 import Header from './components/Header.jsx';
 import Reservar from './components/Reservar.jsx';
 import Panel from './components/Panel.jsx';
@@ -23,12 +24,13 @@ export default function App() {
   }, []);
 
   return (
-    <div className="min-h-dvh bg-cancha-950 text-zinc-100">
+    <div className="relative isolate min-h-dvh text-zinc-100">
+      <Estadio />
       <Header vista={vista} onCambiar={setVista} modo={info?.modo} />
 
-      <main className="mx-auto max-w-7xl px-3 pb-10 pt-4 sm:px-6">
+      <main className="mx-auto max-w-7xl px-3 pb-10 pt-4 sm:px-6 sm:pt-6">
         {errorInfo && (
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+          <div className="glass animate-aparecer mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl !border-red-500/30 px-4 py-3 text-sm text-red-200">
             <span>⚠️ {errorInfo}</span>
             <button onClick={cargarInfo} className="rounded-lg bg-red-500/20 px-3 py-1 font-semibold hover:bg-red-500/30">
               Reintentar
@@ -37,10 +39,10 @@ export default function App() {
         )}
 
         {/* Las dos vistas quedan montadas para no perder el chat al cambiar */}
-        <div className={vista === 'reservar' ? '' : 'hidden'}>
+        <div className={vista === 'reservar' ? 'animate-aparecer' : 'hidden'}>
           <Reservar info={info} />
         </div>
-        <div className={vista === 'panel' ? '' : 'hidden'}>
+        <div className={vista === 'panel' ? 'animate-aparecer' : 'hidden'}>
           <Panel info={info} activo={vista === 'panel'} />
         </div>
       </main>

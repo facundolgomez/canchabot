@@ -65,18 +65,26 @@ export const horaActualTexto = () =>
 export const precio = (n) =>
   new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(n || 0);
 
+export const relojBA = () =>
+  new Intl.DateTimeFormat('es-AR', {
+    timeZone: TZ,
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+  }).format(new Date());
+
 export const ESTADOS = {
   pendiente_sena: {
     label: 'Pendiente de seña',
-    badge: 'bg-amber-400/15 text-amber-300 ring-amber-400/30',
-    celda: 'bg-amber-400/15 border-amber-400/40 text-amber-100',
-    punto: 'bg-amber-400',
+    badge: 'bg-oro-400/15 text-oro-300 ring-oro-400/30',
+    celda: 'bg-oro-400/12 border-oro-400/45 text-oro-200 shadow-[inset_0_0_16px_-6px_rgb(245_197_66/0.5)]',
+    punto: 'bg-oro-400 shadow-[0_0_6px_rgb(245_197_66/0.8)]',
   },
   confirmada: {
     label: 'Confirmada',
-    badge: 'bg-lime-400/15 text-lime-300 ring-lime-400/30',
-    celda: 'bg-lime-400/15 border-lime-400/40 text-lime-50',
-    punto: 'bg-lime-400',
+    badge: 'bg-cesped-400/15 text-cesped-300 ring-cesped-400/30',
+    celda: 'bg-cesped-400/12 border-cesped-400/45 text-white shadow-[inset_0_0_16px_-6px_rgb(34_227_107/0.55)]',
+    punto: 'bg-cesped-400 shadow-[0_0_6px_rgb(34_227_107/0.8)]',
   },
   cancelada: {
     label: 'Cancelada',
