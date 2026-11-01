@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Barlow Condensed", "Inter", ui-sans-serif, sans-serif;
+
+  --color-cancha-950: #06120c;
+  --color-cancha-900: #0a1d13;
+  --color-cancha-800: #0f2a1b;
+  --color-cancha-700: #164027;
+  --color-cancha-600: #1f5a36;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-cancha-950);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Franjas de césped */
+.cesped {
+  background-image:
+    repeating-linear-gradient(90deg, rgb(255 255 255 / 0.035) 0 56px, transparent 56px 112px),
+    radial-gradient(ellipse at top right, rgb(163 230 53 / 0.18), transparent 60%);
+}
+
+/* Fondo del chat estilo WhatsApp */
+.chat-fondo {
+  background-color: #0b141a;
+  background-image: radial-gradient(rgb(255 255 255 / 0.045) 1px, transparent 1px);
+  background-size: 18px 18px;
+}
+
+.scroll-fino {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(255 255 255 / 0.15) transparent;
+}
+
+.sin-scroll {
+  scrollbar-width: none;
+}
+.sin-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+@keyframes aparecer {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.aparecer {
+  animation: aparecer 0.25s ease-out both;
+}
